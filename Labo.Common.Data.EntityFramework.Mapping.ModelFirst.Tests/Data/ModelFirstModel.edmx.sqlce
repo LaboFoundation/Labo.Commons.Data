@@ -1,0 +1,49 @@
+
+-- --------------------------------------------------
+-- Entity Designer DDL Script for SQL Server Compact Edition
+-- --------------------------------------------------
+-- Date Created: 03/14/2014 23:39:53
+-- Generated from EDMX file: C:\Users\boraa\Documents\GitHub\Labo.Commons.Data\Labo.Common.Data.Tests\EntityFramework\Contexts\ModelFirst\ModelFirstModel.edmx
+-- --------------------------------------------------
+
+
+-- --------------------------------------------------
+-- Dropping existing FOREIGN KEY constraints
+-- NOTE: if the constraint does not exist, an ignorable error will be reported.
+-- --------------------------------------------------
+
+
+-- --------------------------------------------------
+-- Dropping existing tables
+-- NOTE: if the table does not exist, an ignorable error will be reported.
+-- --------------------------------------------------
+
+
+-- --------------------------------------------------
+-- Creating all tables
+-- --------------------------------------------------
+
+-- Creating table 'CustomerModelSet'
+CREATE TABLE [CustomerModelSet] (
+    [Id] int IDENTITY(1,1) NOT NULL,
+    [Name] nvarchar(4000)  NOT NULL
+);
+GO
+
+-- --------------------------------------------------
+-- Creating all PRIMARY KEY constraints
+-- --------------------------------------------------
+
+-- Creating primary key on [Id] in table 'CustomerModelSet'
+ALTER TABLE [CustomerModelSet]
+ADD CONSTRAINT [PK_CustomerModelSet]
+    PRIMARY KEY ([Id] );
+GO
+
+-- --------------------------------------------------
+-- Creating all FOREIGN KEY constraints
+-- --------------------------------------------------
+
+-- --------------------------------------------------
+-- Script has ended
+-- --------------------------------------------------
