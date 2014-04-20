@@ -11,11 +11,12 @@
 
     // TODO: Add multi-threaded tests
     // TODO: Add session tests
+    // TODO: Add session commit tests
     [TestFixture]
     public class SessionScopeTestFixture
     {
         [Test]
-        public void SessionScopeCurrentMustBeSameInstanceInUsingScope()
+        public void SessionScopeCurrentMustBeSameInstanceInUsingStatement()
         {
             ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
             sessionFactory.CreateSession().Returns(Substitute.For<ISession>());
@@ -34,7 +35,7 @@
         }
 
         [Test]
-        public void SessionScopeCurrentMustBeNullWhenOutOfUsingScope()
+        public void SessionScopeCurrentMustBeNullWhenOutOfUsingStatement()
         {
             ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
             sessionFactory.CreateSession().Returns(Substitute.For<ISession>());
@@ -115,7 +116,7 @@
         }
 
         [Test, Sequential]
-        public void WhenNestedSessionScopeScopeCurrentMustBeNullWhenOutOfUsingRootScope([Values(SessionScopeOption.Required, SessionScopeOption.RequiresNew)]SessionScopeOption sessionScopeOption)
+        public void WhenNestedSessionScopeScopeCurrentMustBeNullWhenOutOfUsingStatement([Values(SessionScopeOption.Required, SessionScopeOption.RequiresNew)]SessionScopeOption sessionScopeOption)
         {
             ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
             sessionFactory.CreateSession().Returns(Substitute.For<ISession>());
@@ -202,29 +203,152 @@
         }
 
         [Test]
-        public void Test1()
+        public void WhenSessionScopeIsCreatedThenSessionFactoryCreateSessionMustBeCalledOnce()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();          
+            sessionFactory.CreateSession().Returns(Substitute.For<ISession>());
+
+            using (new SessionScope(sessionFactory))
+            {
+                sessionFactory.Received(1).CreateSession();
+            }
+        }
+
+        [Test]
+        public void WhenTwoNestedSessionScopeIsCreatedThenSessionFactoryCreateSessionMustBeCalledOnce()
         {
             ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
-            ISession session = Substitute.For<ISession>();
-            sessionFactory.CreateSession().Returns(session);
+            sessionFactory.CreateSession().Returns(Substitute.For<ISession>());
 
+            using (new SessionScope(sessionFactory, SessionScopeOption.Required))
+            {
+                using (new SessionScope(sessionFactory, SessionScopeOption.Required))
+                {
+                    sessionFactory.Received(1).CreateSession();
+                }
+            }
+        }
+
+        [Test]
+        public void WhenTwoNestedSessionScopeIsCreatedWithRequiresNewThenSessionFactoryCreateSessionMustBeCalledTwice()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+            sessionFactory.CreateSession().Returns(Substitute.For<ISession>());
+
+            using (new SessionScope(sessionFactory, SessionScopeOption.Required))
+            {
+                using (new SessionScope(sessionFactory, SessionScopeOption.RequiresNew))
+                {
+                    sessionFactory.Received(2).CreateSession();
+                }
+            }
+        }
+
+        [Test]
+        public void WhenThreeNestedSessionScopeOneOfThemIsCreatedWithRequiresNewThenSessionFactoryCreateSessionMustBeCalledTwice()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+            sessionFactory.CreateSession().Returns(Substitute.For<ISession>());
+
+            using (new SessionScope(sessionFactory, SessionScopeOption.Required))
+            {
+                using (new SessionScope(sessionFactory, SessionScopeOption.RequiresNew))
+                {
+                    using (new SessionScope(sessionFactory, SessionScopeOption.Required))
+                    {
+                        sessionFactory.Received(2).CreateSession();
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void WhenOutOfSessionScopeUsingStatementThenSessionScopeSessionMustBeDisposed()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
             bool sessionDisposed = false;
+            ISession session = Substitute.For<ISession>();
             session.When(x => x.Dispose()).Do(x => sessionDisposed = true);
+            sessionFactory.CreateSession().Returns(session);
 
             SessionScope sessionScope = new SessionScope(sessionFactory);
             using (sessionScope)
             {
-                Assert.AreEqual(sessionScope, SessionScope.Current);
-                Assert.AreSame(sessionScope, SessionScope.Current);
-
-                Assert.AreEqual(false, sessionScope.Disposed);
-                Assert.AreEqual(false, sessionScope.Completed);
             }
 
             session.Received(1).Dispose();
 
             Assert.IsTrue(sessionScope.Disposed);
-            Assert.IsFalse(sessionScope.Completed);
+            Assert.IsNull(sessionScope.Session);
+            Assert.IsTrue(sessionDisposed);
+        }
+
+        [Test]
+        public void WhenTwoNestedSessionScopeCreatedWithRequiredOptionThenSessionScopeSessionDisposeMustBeCalledOnce()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+            bool sessionDisposed = false;
+            ISession session = Substitute.For<ISession>();
+            session.When(x => x.Dispose()).Do(x => sessionDisposed = true);
+            sessionFactory.CreateSession().Returns(session);
+
+            using (new SessionScope(sessionFactory))
+            {
+                using (new SessionScope(sessionFactory, SessionScopeOption.Required))
+                {
+                }
+
+                session.DidNotReceive().Dispose();
+                Assert.IsFalse(sessionDisposed);
+            }
+
+            session.Received(1).Dispose();
+            Assert.IsTrue(sessionDisposed);
+        }
+
+        [Test]
+        public void WhenTwoNestedSessionScopeCreatedWithRequiresNewOptionThenSessionScopeSessionDisposeMustBeCalledTwice()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+            bool sessionDisposed = false;
+            ISession session = Substitute.For<ISession>();
+            session.When(x => x.Dispose()).Do(x => sessionDisposed = true);
+            sessionFactory.CreateSession().Returns(session);
+
+            using (new SessionScope(sessionFactory, SessionScopeOption.RequiresNew))
+            {
+                using (new SessionScope(sessionFactory, SessionScopeOption.RequiresNew))
+                {
+                }
+
+                session.Received(1).Dispose();
+                Assert.IsTrue(sessionDisposed);
+            }
+
+            session.Received(2).Dispose();
+            Assert.IsTrue(sessionDisposed);
+        }
+
+        [Test]
+        public void Test1()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+            bool sessionDisposed = false;
+            ISession session = Substitute.For<ISession>();
+            session.When(x => x.Dispose()).Do(x => sessionDisposed = true);
+            sessionFactory.CreateSession().Returns(session);
+
+            SessionScope sessionScope = new SessionScope(sessionFactory);
+            using (sessionScope)
+            {
+                Assert.AreSame(session, sessionScope.Session);
+                Assert.AreSame(session, SessionScope.Current.Session);
+            }
+
+            sessionFactory.Received(1).CreateSession();
+            session.Received(1).Dispose();
+
+            Assert.IsTrue(sessionScope.Disposed);
 
             Assert.IsNull(SessionScope.Current);
             Assert.IsNull(sessionScope.Session);
