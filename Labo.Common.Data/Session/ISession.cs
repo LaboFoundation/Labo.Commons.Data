@@ -4,6 +4,6 @@
 
     public interface ISession : IDisposable
     {
-        void Flush();
+        void Commit();
     }
 }
