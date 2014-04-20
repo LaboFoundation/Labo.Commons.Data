@@ -238,6 +238,12 @@
                 {
                     if (m_Completed)
                     {
+                        if (m_HasCommitableSession)
+                        {
+                            // If there is no dependent session scope flush session
+                            m_Session.Commit();
+                        }
+
                         m_Disposed = true;
                         return;
                     }
@@ -249,7 +255,7 @@
                     m_Disposed = true;
                     s_Head = m_Parent;
 
-                    if (m_Parent == null)
+                    if (m_HasCommitableSession)
                     {
                         m_Session.Dispose();
                         m_Session = null;
