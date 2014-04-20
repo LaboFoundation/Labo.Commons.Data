@@ -6,7 +6,7 @@
 
     public sealed class EntityFrameworkSession : ISession
     {
-        public void Flush()
+        public void Commit()
         {
             throw new NotImplementedException();
         }
