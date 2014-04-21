@@ -17,8 +17,8 @@
         IRepository<TEntity> CreateRepository<TEntity>() where TEntity : class;
 
         /// <summary>
-        /// Commits all the operations in the scope.
+        /// Compeletes the session scope.
         /// </summary>
-        void Commit();
+        void Complete();
     }
 }
