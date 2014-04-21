@@ -4,13 +4,13 @@
     using System.Collections.Generic;
 
     using Labo.Common.Data.Session;
+    using Labo.Common.Data.Session.Exceptions;
 
     using NSubstitute;
 
     using NUnit.Framework;
 
     // TODO: Add multi-threaded tests
-    // TODO: Add session commit tests
     [TestFixture]
     public class SessionScopeTestFixture
     {
@@ -351,13 +351,13 @@
 
             using (SessionScope sessionScope = new SessionScope(sessionFactory))
             {
-                Assert.AreSame(session, sessionScope.Session);
-                Assert.AreSame(session, SessionScope.Current.Session);
+                Assert.AreSame(session, GetInnerSession(sessionScope.Session));
+                Assert.AreSame(session, GetInnerSession(SessionScope.Current.Session));
             }
         }
 
         [Test]
-        public void Test1()
+        public void WhenSecondSessionScopeIsCreatedWithRequiredOptionThenItMustUseParentSession()
         {
             ISessionFactory sessionFactory1 = Substitute.For<ISessionFactory>();
             ISession session1 = Substitute.For<ISession>();
@@ -367,41 +367,175 @@
             ISession session2 = Substitute.For<ISession>();
             sessionFactory2.CreateSession().Returns(session2);
 
-            using (SessionScope sessionScope = new SessionScope(sessionFactory1))
+            using (SessionScope sessionScope = new SessionScope(sessionFactory1, SessionScopeOption.Required))
             {
-                Assert.AreSame(session1, sessionScope.Session);
-                Assert.AreSame(session1, SessionScope.Current.Session);
+                Assert.AreSame(session1, GetInnerSession(sessionScope.Session));
+                Assert.AreSame(session1, GetInnerSession(SessionScope.Current.Session));
 
-                using (SessionScope sessionScope1 = new SessionScope(sessionFactory2))
+                using (SessionScope sessionScope1 = new SessionScope(sessionFactory2, SessionScopeOption.Required))
                 {
-                    Assert.AreSame(session1, sessionScope1.Session);
-                    Assert.AreSame(session1, sessionScope.Session);
-                    Assert.AreSame(session1, SessionScope.Current.Session);
+                    Assert.AreSame(session1, GetInnerSession(sessionScope1.Session));
+                    Assert.AreSame(session1, GetInnerSession(sessionScope.Session));
+                    Assert.AreSame(session1, GetInnerSession(SessionScope.Current.Session));
 
                     using (SessionScope sessionScope2 = new SessionScope(sessionFactory2, SessionScopeOption.RequiresNew))
                     {
-                        Assert.AreSame(session2, sessionScope2.Session);
-                        Assert.AreSame(session2, SessionScope.Current.Session);
+                        Assert.AreSame(session2, GetInnerSession(sessionScope2.Session));
+                        Assert.AreSame(session2, GetInnerSession(SessionScope.Current.Session));
                     }
                 }
             }
         }
 
         [Test]
-        public void Test()
+        public void WhenSessionScopeCompleteIsCalledThenSessionCommitMustBeCalled()
         {
             ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+
+            bool sessionCommitted = false;
             ISession session = Substitute.For<ISession>();
+            session.When(x => x.Commit()).Do(x => sessionCommitted = true);
+
             sessionFactory.CreateSession().Returns(session);
 
             using (SessionScope sessionScope = new SessionScope(sessionFactory))
             {
-                Assert.AreEqual(sessionScope, SessionScope.Current);
-                Assert.AreSame(sessionScope, SessionScope.Current);
-
-                Assert.AreEqual(session, SessionScope.Current.Session);
-                Assert.AreSame(session, SessionScope.Current.Session);
+                sessionScope.Complete();
             }
+
+            Assert.IsTrue(sessionCommitted);
+            session.Received(1).Commit();
+            session.Received(1).Dispose();
+        }
+
+        [Test]
+        public void WhenTwoNestedSessionScopeAreCreatedWithRequiredOptionThenSessionCommitMustBeCalledWhenParentSessionScpoeCommitIsCalled()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+
+            bool sessionCommitted = false;
+            ISession session = Substitute.For<ISession>();
+            session.When(x => x.Commit()).Do(x => sessionCommitted = true);
+
+            sessionFactory.CreateSession().Returns(session);
+
+            using (SessionScope sessionScope1 = new SessionScope(sessionFactory, SessionScopeOption.Required))
+            {
+                using (SessionScope sessionScope2 = new SessionScope(sessionFactory, SessionScopeOption.Required))
+                {
+                    sessionScope2.Complete();
+                }
+
+                Assert.IsFalse(sessionCommitted);
+                session.DidNotReceive().Commit();
+
+                sessionScope1.Complete();
+            }
+
+            Assert.IsTrue(sessionCommitted);
+            session.Received(1).Commit();
+        }
+
+        [Test]
+        public void WhenTwoNestedSessionScopeIsCreatedWithRequiredOptionAndInnerSessionScopeIsNotCompletedThenSessionAbortedExceptionMustBeThrownWhenOutterSessionScopeCompleteIsCalled()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+
+            bool sessionCommitted = false;
+            ISession session = Substitute.For<ISession>();
+            session.When(x => x.Commit()).Do(x => sessionCommitted = true);
+
+            sessionFactory.CreateSession().Returns(session);
+
+            Assert.Throws<SessionAbortedException>(
+                () =>
+                    {
+                        using (SessionScope sessionScope1 = new SessionScope(sessionFactory, SessionScopeOption.Required))
+                        {
+                            using (new SessionScope(sessionFactory, SessionScopeOption.Required))
+                            {
+                            }
+
+                            Assert.IsFalse(sessionCommitted);
+                            session.DidNotReceive().Commit();
+
+                            Assert.IsTrue(sessionScope1.IsSessionAborted);
+
+                            sessionScope1.Complete();
+                        }
+                    });
+
+            Assert.IsFalse(sessionCommitted);
+            session.DidNotReceive().Commit();
+        }
+
+        [Test]
+        public void WhenSessionScopeCompleteIsNotCalledThenSessionCommitMustNotBeCalled()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+
+            bool sessionCommitted = false;
+            ISession session = Substitute.For<ISession>();
+            session.When(x => x.Commit()).Do(x => sessionCommitted = true);
+
+            sessionFactory.CreateSession().Returns(session);
+
+            using (new SessionScope(sessionFactory))
+            {
+            }
+
+            Assert.IsFalse(sessionCommitted);
+            session.DidNotReceive().Commit();
+            session.Received(1).Dispose();
+        }
+
+        [Test]
+        public void WhenInnerSessionScopeWithRequiresNewOptionAndIsNotCompletedSessionCommitMustNotBeCalled()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+
+            Stack<ISession> sessionStack = new Stack<ISession>();
+            sessionFactory.CreateSession().Returns(x => sessionStack.Pop());
+
+            bool session1IsCommited = false;
+            bool session2IsCommited = false;
+
+            sessionFactory.When(x => x.CreateSession()).Do(
+                x =>
+                {
+                    ISession session = Substitute.For<ISession>();
+                    if (sessionStack.Count == 0)
+                    {
+                        session.When(y => y.Commit()).Do(z => session1IsCommited = true);
+                    }
+                    else
+                    {
+                        session.When(y => y.Commit()).Do(z => session2IsCommited = true);
+                    }
+
+                    sessionStack.Push(session);
+                });
+
+            using (SessionScope sessionScope1 = new SessionScope(sessionFactory, SessionScopeOption.Required))
+            {
+                SessionScope sessionScope2 = new SessionScope(sessionFactory, SessionScopeOption.RequiresNew);
+
+                using (sessionScope2)
+                {
+                }
+
+                Assert.IsTrue(sessionScope2.IsSessionAborted);
+                Assert.IsFalse(session2IsCommited);
+
+                sessionScope1.Complete();
+            }
+
+            Assert.IsTrue(session1IsCommited);
+        }
+
+        private static ISession GetInnerSession(ISession session)
+        {
+            return ((SessionScope.ISessionContainer)session).InnerSession;
         }
     }
 }
