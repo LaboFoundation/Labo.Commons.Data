@@ -10,7 +10,6 @@
     using NUnit.Framework;
 
     // TODO: Add multi-threaded tests
-    // TODO: Add session tests
     // TODO: Add session commit tests
     [TestFixture]
     public class SessionScopeTestFixture
@@ -330,29 +329,62 @@
         }
 
         [Test]
-        public void Test1()
+        public void SessionScopeSessionMustBeNullWhenOutofUsingStatement()
         {
             ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
-            bool sessionDisposed = false;
-            ISession session = Substitute.For<ISession>();
-            session.When(x => x.Dispose()).Do(x => sessionDisposed = true);
-            sessionFactory.CreateSession().Returns(session);
+            sessionFactory.CreateSession().Returns(Substitute.For<ISession>());
 
             SessionScope sessionScope = new SessionScope(sessionFactory);
             using (sessionScope)
             {
+            }
+
+            Assert.IsNull(sessionScope.Session);
+        }
+
+        [Test]
+        public void SessionScopeSessionMustBeEqualToSessionScopeCurrentSessionInTheUsingStatement()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+            ISession session = Substitute.For<ISession>();
+            sessionFactory.CreateSession().Returns(session);
+
+            using (SessionScope sessionScope = new SessionScope(sessionFactory))
+            {
                 Assert.AreSame(session, sessionScope.Session);
                 Assert.AreSame(session, SessionScope.Current.Session);
             }
+        }
 
-            sessionFactory.Received(1).CreateSession();
-            session.Received(1).Dispose();
+        [Test]
+        public void Test1()
+        {
+            ISessionFactory sessionFactory1 = Substitute.For<ISessionFactory>();
+            ISession session1 = Substitute.For<ISession>();
+            sessionFactory1.CreateSession().Returns(session1);
 
-            Assert.IsTrue(sessionScope.Disposed);
+            ISessionFactory sessionFactory2 = Substitute.For<ISessionFactory>();
+            ISession session2 = Substitute.For<ISession>();
+            sessionFactory2.CreateSession().Returns(session2);
 
-            Assert.IsNull(SessionScope.Current);
-            Assert.IsNull(sessionScope.Session);
-            Assert.IsTrue(sessionDisposed);
+            using (SessionScope sessionScope = new SessionScope(sessionFactory1))
+            {
+                Assert.AreSame(session1, sessionScope.Session);
+                Assert.AreSame(session1, SessionScope.Current.Session);
+
+                using (SessionScope sessionScope1 = new SessionScope(sessionFactory2))
+                {
+                    Assert.AreSame(session1, sessionScope1.Session);
+                    Assert.AreSame(session1, sessionScope.Session);
+                    Assert.AreSame(session1, SessionScope.Current.Session);
+
+                    using (SessionScope sessionScope2 = new SessionScope(sessionFactory2, SessionScopeOption.RequiresNew))
+                    {
+                        Assert.AreSame(session2, sessionScope2.Session);
+                        Assert.AreSame(session2, SessionScope.Current.Session);
+                    }
+                }
+            }
         }
 
         [Test]
