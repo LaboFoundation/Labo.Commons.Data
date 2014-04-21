@@ -5,9 +5,77 @@
 
     using Labo.Common.Data.Repository;
     using Labo.Common.Data.Resources;
+    using Labo.Common.Data.Session.Exceptions;
 
     public sealed class SessionScope : ISessionScope
     {
+        internal interface ISessionContainer : ISession
+        {
+             ISession InnerSession { get; }
+        }
+
+        private sealed class SessionContainer : ISessionContainer
+        {
+            private ISession m_InnerSession;
+
+            private bool m_Aborted;
+
+            private bool m_Disposed;
+
+            public ISession InnerSession
+            {
+                get { return m_InnerSession; }
+            }
+
+            public SessionContainer(ISession session)
+            {
+                m_InnerSession = session;
+            }
+
+            ~SessionContainer()
+            {
+                Dispose(false);
+            }
+
+            public bool Aborted
+            {
+                get
+                {
+                    return m_Aborted;
+                }
+            }
+
+            public void Commit()
+            {
+                m_InnerSession.Commit();
+            }
+
+            public void Abort()
+            {
+                m_Aborted = true;
+            }
+
+            public void Dispose()
+            {
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+
+            private void Dispose(bool disposing)
+            {
+                if (m_Disposed)
+                {
+                    return;
+                }
+
+                if (disposing)
+                {
+                    m_InnerSession.Dispose();
+                    m_InnerSession = null;
+                }
+            }
+        }
+
         /// <summary>
         /// The head session scope.
         /// </summary>
@@ -40,11 +108,13 @@
         private bool m_Completed;
 
         /// <summary>
-        /// The session
+        /// The session container
         /// </summary>
-        private ISession m_Session;
+        private SessionContainer m_SessionContainer;
 
         private bool m_HasCommitableSession;
+
+        private bool m_SessionAborted;
 
         /// <summary>
         /// Gets the current session scope.
@@ -67,7 +137,7 @@
         {
             get
             {
-                return m_Session;
+                return m_SessionContainer;
             }
         }
 
@@ -159,12 +229,12 @@
             if (Current == null || sessionScopeOption == SessionScopeOption.RequiresNew)
             {
                 m_HasCommitableSession = true;
-                m_Session = sessionFactory.CreateSession();
+                m_SessionContainer = new SessionContainer(sessionFactory.CreateSession());
             }
             else
             {
                 m_HasCommitableSession = false;
-                m_Session = Current.Session;
+                m_SessionContainer = Current.m_SessionContainer;
             }
 
             m_Parent = s_Head;
@@ -184,14 +254,6 @@
             throw new NotImplementedException();
         }
 
-        public void Commit()
-        {
-        }
-
-        public void Rollback()
-        {
-        }
-
         /// <summary>
         /// Completes the session scope.
         /// </summary>
@@ -207,6 +269,12 @@
             if (m_Completed)
             {
                 throw new InvalidOperationException(Strings.Current_SessionScope_is_already_completed);
+            }
+
+            // If current session is aborted session scope cannot be completed
+            if (m_SessionContainer.Aborted)
+            {
+                throw new SessionAbortedException(Strings.SessionScope_Session_has_aborted);
             }
 
             m_Completed = true;
@@ -240,15 +308,14 @@
                     {
                         if (m_HasCommitableSession)
                         {
-                            // If there is no dependent session scope flush session
-                            m_Session.Commit();
+                            // If there is no dependent session scope commit session
+                            CommitSession();
                         }
-
-                        m_Disposed = true;
-                        return;
                     }
-
-                    Rollback();
+                    else
+                    {
+                        Abort();                        
+                    }
                 }
                 finally
                 {
@@ -257,12 +324,31 @@
 
                     if (m_HasCommitableSession)
                     {
-                        m_Session.Dispose();
-                        m_Session = null;
+                        m_SessionContainer.Dispose();
+                        m_SessionContainer = null;
                     }
 
                     Thread.EndThreadAffinity();
                 }
+            }
+        }
+
+        private void CommitSession()
+        {
+            m_SessionContainer.Commit();
+        }
+
+        private void Abort()
+        {
+            m_SessionAborted = true;
+            m_SessionContainer.Abort();
+        }
+
+        internal bool IsSessionAborted
+        {
+            get
+            {
+                return m_SessionContainer == null ? m_SessionAborted : m_SessionContainer.Aborted;
             }
         }
     }
