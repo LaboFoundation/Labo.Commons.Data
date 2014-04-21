@@ -68,5 +68,14 @@ namespace Labo.Common.Data.Resources {
                 return ResourceManager.GetString("Current_SessionScope_is_already_completed", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to session has aborted.
+        /// </summary>
+        internal static string SessionScope_Session_has_aborted {
+            get {
+                return ResourceManager.GetString("SessionScope_Session_has_aborted", resourceCulture);
+            }
+        }
     }
 }
