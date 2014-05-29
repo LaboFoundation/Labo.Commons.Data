@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
 
     using Labo.Common.Data.Session;
     using Labo.Common.Data.Session.Exceptions;
@@ -10,7 +12,6 @@
 
     using NUnit.Framework;
 
-    // TODO: Add multi-threaded tests
     [TestFixture]
     public class SessionScopeTestFixture
     {
@@ -531,6 +532,45 @@
             }
 
             Assert.IsTrue(session1IsCommited);
+        }
+
+        [Test]
+        public void SessionScopeCurrentMustBeUniqueWhenMultiThreaded()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+            sessionFactory.CreateSession().Returns(Substitute.For<ISession>());
+
+            const int threadCount = 1000;
+            List<Guid> scopeIds = new List<Guid>(threadCount);
+            List<Thread> threads = new List<Thread>(threadCount);
+            List<SessionScope> sessionScopes = new List<SessionScope>(threadCount);
+
+            for (int i = 0; i < threadCount; i++)
+            {
+                threads.Add(new Thread(
+                    x =>
+                        {
+                            sessionScopes.Add(new SessionScope(sessionFactory, SessionScopeOption.RequiresNew));
+                            lock (scopeIds)
+                            {
+                                scopeIds.Add(SessionScope.Current.ScopeId);                                
+                            }
+                        }));
+            }
+
+            for (int i = 0; i < threads.Count; i++)
+            {
+                Thread thread = threads[i];
+                thread.Start();
+            }
+
+            for (int i = 0; i < threads.Count; i++)
+            {
+                Thread thread = threads[i];
+                thread.Join();
+            }
+
+            Assert.AreEqual(scopeIds.Count, scopeIds.Distinct().Count());
         }
 
         private static ISession GetInnerSession(ISession session)
