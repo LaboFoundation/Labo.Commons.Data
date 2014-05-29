@@ -17,7 +17,7 @@
         IRepository<TEntity> CreateRepository<TEntity>() where TEntity : class;
 
         /// <summary>
-        /// Compeletes the session scope.
+        /// Completes the session scope.
         /// </summary>
         void Complete();
     }
