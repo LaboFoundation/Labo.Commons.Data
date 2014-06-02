@@ -30,8 +30,12 @@ namespace Labo.Common.Data.Session
 {
     using System;
 
+    using Labo.Common.Data.Repository;
+
     public interface ISession : IDisposable
     {
+        IRepository<TEntity> GetRepository<TEntity>() where TEntity : class;
+
         void Commit();
     }
 }
