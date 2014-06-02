@@ -31,20 +31,40 @@ namespace Labo.Common.Data.Repository
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Linq;
     using System.Linq.Expressions;
 
+    using Labo.Common.Data.Entity;
     using Labo.Common.Data.Transaction;
 
-    public interface IRepository<TEntity> where TEntity : class
+    public interface IRepository : IDisposable
     {
-        IQueryable<TEntity> Query();
+        int Delete();
+
+        void SaveChanges();
+
+        int ExecuteStoreCommand(string commandText, params object[] parameters);
+
+        ITransaction BeginTransaction(IsolationLevel isolationLevel);
+
+        ITransaction BeginTransaction();
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
+        IDbConnection GetConnection();
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
+        ITransaction GetTransaction();
+    }
+
+    public interface IRepository<TEntity> : IRepository
+        where TEntity : class
+    {
+        IRepositoryQueryable<TEntity> Query();
 
         void Insert(TEntity entity);
 
-        void InsertOrUpdate(TEntity entity);
-
         void Update(TEntity entity);
+
+        void Update(IDirtyPropertyTrackingEntity<TEntity> dirtyPropertyTrackingEntity);
 
         int Update(Expression<Func<TEntity, TEntity>> updateExpression);
 
@@ -54,29 +74,19 @@ namespace Labo.Common.Data.Repository
 
         void Delete(TEntity entity);
 
-        int Delete();
-
         int Delete(Expression<Func<TEntity, bool>> filterExpression);
 
         IList<TEntity> LoadAll();
 
         //PagedResult<TEntity> LoadAll(int pageNo, int pageSize);
 
-        //PagedResult<TEntity> PagedQuery(IQueryable<TEntity> objectQuery, int pageNo, int pageSize);
-
-        void SaveChanges();
+        //PagedResult<TEntity> PagedQuery(IQueryable<TEntity> queryable, int pageNo, int pageSize);
 
         void Attach(TEntity entity);
 
         void AttachTo(string entitySetName, TEntity entity);
 
         void DeleteUnAttached(TEntity entity);
-
-        int ExecuteStoreCommand(string commandText, params object[] parameters);
-
-        ITransaction BeginTransaction(IsolationLevel isolationLevel);
-
-        ITransaction BeginTransaction();
 
         void BulkInsert(string destinationTable, IEnumerable<TEntity> collection);
 
@@ -85,9 +95,5 @@ namespace Labo.Common.Data.Repository
         void BulkInsert(string destinationTable, IEnumerable<TEntity> collection, IDbConnection connection, IDbTransaction dbTransaction = null);
 
         void BulkInsert(IEnumerable<TEntity> collection, IDbConnection connection, IDbTransaction dbTransaction = null);
-
-        IDbConnection GetConnection();
-
-        ITransaction GetTransaction();
     }
 }
