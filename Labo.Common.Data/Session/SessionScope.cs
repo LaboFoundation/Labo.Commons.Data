@@ -73,6 +73,11 @@ namespace Labo.Common.Data.Session
                 }
             }
 
+            public IRepository<TEntity> GetRepository<TEntity>() where TEntity : class
+            {
+                return m_InnerSession.GetRepository<TEntity>();
+            }
+
             public void Commit()
             {
                 m_InnerSession.Commit();
@@ -277,9 +282,9 @@ namespace Labo.Common.Data.Session
             Dispose(false);
         }
 
-        public IRepository<TEntity> CreateRepository<TEntity>() where TEntity : class
+        public IRepository<TEntity> GetRepository<TEntity>() where TEntity : class
         {
-            throw new NotImplementedException();
+            return m_SessionContainer.GetRepository<TEntity>();
         }
 
         /// <summary>
