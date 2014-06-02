@@ -33,6 +33,7 @@ namespace Labo.Common.Data.EntityFramework
     using System.Collections.Generic;
     using System.Data.Objects;
     using System.Globalization;
+    using System.Reflection;
 
     using Labo.Common.Data.EntityFramework.Exceptions;
     using Labo.Common.Data.EntityFramework.Mapping;
@@ -48,9 +49,9 @@ namespace Labo.Common.Data.EntityFramework
         private readonly ConcurrentDictionary<Type, Guid> m_ObjectContextEntityTypeCache = new ConcurrentDictionary<Type, Guid>();
 
         /// <summary>
-        /// The object contexts container.
+        /// The object context creators container.
         /// </summary>
-        private readonly ConcurrentDictionary<Guid, Func<ObjectContext>> m_ObjectContexts = new ConcurrentDictionary<Guid, Func<ObjectContext>>();
+        private readonly ConcurrentDictionary<Guid, Func<ObjectContext>> m_ObjectContextCreators = new ConcurrentDictionary<Guid, Func<ObjectContext>>();
         
         /// <summary>
         /// The entity type to table name mapping container.
@@ -94,7 +95,7 @@ namespace Labo.Common.Data.EntityFramework
             }
 
             Guid key = GetObjectContextKey(type);
-            ObjectContext objectContext = m_ObjectContexts[key]();
+            ObjectContext objectContext = m_ObjectContextCreators[key]();
 
             // Disable Proxy Creation
             objectContext.ContextOptions.ProxyCreationEnabled = false;
@@ -139,7 +140,8 @@ namespace Labo.Common.Data.EntityFramework
         /// Registers the object context creator.
         /// </summary>
         /// <param name="contextProvider">The context provider.</param>
-        public void RegisterObjectContextCreator(Func<ObjectContext> contextProvider)
+        /// <param name="entityAssemblies">The entity assemblies.</param>
+        public void RegisterObjectContextCreator(Func<ObjectContext> contextProvider, params Assembly[] entityAssemblies)
         {
             if (contextProvider == null)
             {
@@ -147,10 +149,10 @@ namespace Labo.Common.Data.EntityFramework
             }
 
             Guid key = Guid.NewGuid();
-            m_ObjectContexts.TryAdd(key, contextProvider);
+            m_ObjectContextCreators.TryAdd(key, contextProvider);
             using (ObjectContext context = contextProvider())
             {
-                RegisterObjectContextEntities(context, key);
+                RegisterObjectContextEntities(context, key, entityAssemblies);
             }
         }
 
@@ -160,7 +162,7 @@ namespace Labo.Common.Data.EntityFramework
         /// <param name="type">The entity framework entity type.</param>
         /// <returns>The object context unique identifier.</returns>
         /// <exception cref="System.ArgumentException">No ObjectContext has been registered for the specified type.</exception>
-        private Guid GetObjectContextKey(Type type)
+        public Guid GetObjectContextKey(Type type)
         {
             Guid key;
             if (!m_ObjectContextEntityTypeCache.TryGetValue(type, out key))
@@ -176,9 +178,10 @@ namespace Labo.Common.Data.EntityFramework
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="key">The key.</param>
-        private void RegisterObjectContextEntities(ObjectContext context, Guid key)
+        /// <param name="entityAssemblies">The entity assemblies</param>
+        private void RegisterObjectContextEntities(ObjectContext context, Guid key, params Assembly[] entityAssemblies)
         {
-            IList<EntityMapping> entityMappings = m_EntityMappingResolver.GetEntityMappings(context);
+            IList<EntityMapping> entityMappings = m_EntityMappingResolver.GetEntityMappings(context, entityAssemblies);
             for (int i = 0; i < entityMappings.Count; i++)
             {
                 EntityMapping entityMapping = entityMappings[i];

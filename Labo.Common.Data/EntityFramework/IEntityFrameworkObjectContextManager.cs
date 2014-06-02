@@ -30,6 +30,7 @@ namespace Labo.Common.Data.EntityFramework
 {
     using System;
     using System.Data.Objects;
+    using System.Reflection;
 
     /// <summary>
     /// The EntityFrameworkObjectContextManager interface.
@@ -52,6 +53,14 @@ namespace Labo.Common.Data.EntityFramework
         ObjectContext GetObjectContext(Type type);
 
         /// <summary>
+        /// Gets the object context key for the specified type.
+        /// </summary>
+        /// <param name="type">The entity framework entity type.</param>
+        /// <returns>The object context unique identifier.</returns>
+        /// <exception cref="System.ArgumentException">No ObjectContext has been registered for the specified type.</exception>
+        Guid GetObjectContextKey(Type type);
+
+        /// <summary>
         /// Gets the table name that is mapped to the specified entity type.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
@@ -70,6 +79,7 @@ namespace Labo.Common.Data.EntityFramework
         /// Registers the object context creator.
         /// </summary>
         /// <param name="contextProvider">The context provider.</param>
-        void RegisterObjectContextCreator(Func<ObjectContext> contextProvider);
+        /// <param name="entityAssemblies">The entity assemblies.</param>
+        void RegisterObjectContextCreator(Func<ObjectContext> contextProvider, params Assembly[] entityAssemblies);
     }
 }
