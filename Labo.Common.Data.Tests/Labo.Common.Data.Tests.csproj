@@ -11,6 +11,9 @@
     <AssemblyName>Labo.Common.Data.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -23,11 +26,8 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -75,48 +75,20 @@
   <ItemGroup>
     <Compile Include="EntityFramework\Contexts\CodeFirst\CodeFirstDbContext.cs" />
     <Compile Include="EntityFramework\Contexts\CodeFirst\Domain\Customer.cs" />
+    <Compile Include="EntityFramework\Contexts\CodeFirst\Domain\Order.cs" />
+    <Compile Include="EntityFramework\Contexts\CodeFirst\Domain\OrderItem.cs" />
+    <Compile Include="EntityFramework\Contexts\CodeFirst\Domain\Product.cs" />
     <Compile Include="EntityFramework\Contexts\CodeFirst\Mapping\CustomerMapping.cs" />
-    <Compile Include="EntityFramework\Contexts\ModelFirst\CustomerModel.cs">
-      <DependentUpon>ModelFirstModel.tt</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EntityFramework\Contexts\ModelFirst\CustomerModel_Mapping.cs">
-      <DependentUpon>ModelFirstModel.Mapping.tt</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="EntityFramework\Contexts\ModelFirst\ModelFirstModel.Context.cs">
-      <DependentUpon>ModelFirstModel.Context.tt</DependentUpon>
-      <SubType>Code</SubType>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Include="EntityFramework\Contexts\ModelFirst\ModelFirstModel.cs">
-      <DependentUpon>ModelFirstModel.tt</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Include="EntityFramework\Contexts\ModelFirst\ModelFirstModel.Designer.cs">
-      <DependentUpon>ModelFirstModel.edmx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Include="EntityFramework\Contexts\ModelFirst\ModelFirstModel.Entities.cs">
-      <DependentUpon>ModelFirstModel.Entities.tt</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Include="EntityFramework\Contexts\ModelFirst\ModelFirstModel.Mapping.cs">
-      <DependentUpon>ModelFirstModel.Mapping.tt</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
+    <Compile Include="EntityFramework\Contexts\CodeFirst\Mapping\OrderItemMapping.cs" />
+    <Compile Include="EntityFramework\Contexts\CodeFirst\Mapping\OrderMapping.cs" />
+    <Compile Include="EntityFramework\Contexts\CodeFirst\Mapping\ProductMapping.cs" />
     <Compile Include="EntityFramework\EntityFrameworkObjectContextManagerTestFixture.cs" />
-    <Compile Include="EntityFramework\Contexts\DbFirst\DbFirstModel.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>DbFirstModel.edmx</DependentUpon>
-    </Compile>
+    <Compile Include="EntityFramework\Repository\EntityFrameworkRepositoryFactoryTestFixture.cs" />
+    <Compile Include="EntityFramework\Repository\EntityFrameworkRepositoryTestFixture.cs" />
+    <Compile Include="Session\DefaultSessionTestFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\CustomerService.cs" />
+    <Compile Include="Session\SessionScopeProviderTestFixture.cs" />
     <Compile Include="Session\SessionScopeTestFixture.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -126,48 +98,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EntityDeploy Include="EntityFramework\Contexts\ModelFirst\ModelFirstModel.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>ModelFirstModel.Designer.cs</LastGenOutput>
-    </EntityDeploy>
     <None Include="App.config" />
-    <EntityDeploy Include="EntityFramework\Contexts\DbFirst\DbFirstModel.edmx">
-      <Generator>EntityModelCodeGenerator</Generator>
-      <LastGenOutput>DbFirstModel.Designer.cs</LastGenOutput>
-    </EntityDeploy>
-    <None Include="EntityFramework\Contexts\DbFirst\DbFirstModel.edmx.diagram">
-      <DependentUpon>DbFirstModel.edmx</DependentUpon>
-    </None>
-    <None Include="EntityFramework\Contexts\ModelFirst\ModelFirstModel.Context.tt">
-      <DependentUpon>ModelFirstModel.edmx</DependentUpon>
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ModelFirstModel.Context.cs</LastGenOutput>
-    </None>
-    <None Include="EntityFramework\Contexts\ModelFirst\ModelFirstModel.edmx.diagram">
-      <DependentUpon>ModelFirstModel.edmx</DependentUpon>
-    </None>
-    <None Include="EntityFramework\Contexts\ModelFirst\ModelFirstModel.edmx.sqlce" />
-    <None Include="EntityFramework\Contexts\ModelFirst\ModelFirstModel.Entities.tt">
-      <DependentUpon>ModelFirstModel.edmx</DependentUpon>
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ModelFirstModel.Entities.cs</LastGenOutput>
-    </None>
-    <None Include="EntityFramework\Contexts\ModelFirst\ModelFirstModel.Mapping.tt">
-      <DependentUpon>ModelFirstModel.edmx</DependentUpon>
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ModelFirstModel.Mapping.cs</LastGenOutput>
-    </None>
-    <None Include="EntityFramework\Contexts\ModelFirst\ModelFirstModel.tt">
-      <DependentUpon>ModelFirstModel.edmx</DependentUpon>
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ModelFirstModel.cs</LastGenOutput>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="EfRepositoryDb.sdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Database1.sdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
