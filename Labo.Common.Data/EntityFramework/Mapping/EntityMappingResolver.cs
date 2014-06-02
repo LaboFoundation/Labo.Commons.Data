@@ -50,37 +50,46 @@ namespace Labo.Common.Data.EntityFramework.Mapping
         /// Gets the entity mappings using the specified <see cref="DbContext"/>.
         /// </summary>
         /// <param name="dbContext">The database context.</param>
-        /// <param name="assembly">The assembly.</param>
+        /// <param name="entityAssemblies">The entity assemblies.</param>
         /// <returns>The list of entity mappings.</returns>
-        public IList<EntityMapping> GetEntityMappings(DbContext dbContext, Assembly assembly = null)
+        public IList<EntityMapping> GetEntityMappings(DbContext dbContext, params Assembly[] entityAssemblies)
         {
             if (dbContext == null)
             {
                 throw new ArgumentNullException("dbContext");
             }
 
-            return GetEntityMappings(((IObjectContextAdapter)dbContext).ObjectContext, assembly);
+            return GetEntityMappings(((IObjectContextAdapter)dbContext).ObjectContext, entityAssemblies);
         }
 
         /// <summary>
         /// Gets the entity mappings using the specified <see cref="ObjectContext"/>.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <param name="assembly">The entity assembly.</param>
+        /// <param name="entityAssemblies">The entity assemblies.</param>
         /// <returns>The list of entity mappings.</returns>
-        public IList<EntityMapping> GetEntityMappings(ObjectContext context, Assembly assembly = null)
+        public IList<EntityMapping> GetEntityMappings(ObjectContext context, params Assembly[] entityAssemblies)
         {
             if (context == null)
             {
                 throw new ArgumentNullException("context");
             }
 
+            if (entityAssemblies == null)
+            {
+                throw new ArgumentNullException("entityAssemblies");
+            }
+
             ReflectionHelper.CallMethod(context, "EnsureMetadata");
 
             MetadataWorkspace metadataWorkspace = context.MetadataWorkspace;
-            if (assembly != null)
+            for (int i = 0; i < entityAssemblies.Length; i++)
             {
-                metadataWorkspace.LoadFromAssembly(assembly);
+                Assembly entityAssembly = entityAssemblies[i];
+                if (entityAssembly != null)
+                {
+                    metadataWorkspace.LoadFromAssembly(entityAssembly);
+                }
             }
 
             List<EntityMapping> entityMappings = new List<EntityMapping>();
