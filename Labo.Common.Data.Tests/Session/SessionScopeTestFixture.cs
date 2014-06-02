@@ -5,8 +5,10 @@
     using System.Linq;
     using System.Threading;
 
+    using Labo.Common.Data.Repository;
     using Labo.Common.Data.Session;
     using Labo.Common.Data.Session.Exceptions;
+    using Labo.Common.Data.Tests.EntityFramework.Contexts.CodeFirst.Domain;
 
     using NSubstitute;
 
@@ -573,9 +575,111 @@
             Assert.AreEqual(scopeIds.Count, scopeIds.Distinct().Count());
         }
 
+        [Test]
+        public void SessionScopeGetRepositoryMustReturnFromSessionGetRepositoryMethod()
+        {
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+            ISession session = Substitute.For<ISession>();
+            sessionFactory.CreateSession().Returns(session);
+            IRepository<Customer> customerRepository = Substitute.For<IRepository<Customer>>();
+            session.GetRepository<Customer>().Returns(customerRepository);
+
+            using (SessionScope sessionScope = new SessionScope(sessionFactory))
+            {
+                Assert.AreSame(customerRepository, SessionScope.Current.GetRepository<Customer>());
+
+                session.Received(1).GetRepository<Customer>();
+
+                Assert.AreSame(customerRepository, sessionScope.GetRepository<Customer>());
+
+                session.Received(2).GetRepository<Customer>();
+            }
+        }
+
+        [Test]
+        public void SessionScopeGetRepositoryMustReturnNewRepositoryInstanceWhenSessionScopeIsCreatedWithRequiresNewOption()
+        {
+            List<ISession> sessions = new List<ISession>();
+            List<IRepository<Customer>> repositories = new List<IRepository<Customer>>();
+            ISessionFactory sessionFactory = PrepareSessionFactoryProxyForGetRepositoryMethod(repositories, sessions);
+
+            using (SessionScope sessionScope1 = new SessionScope(sessionFactory, SessionScopeOption.RequiresNew))
+            {
+                Assert.AreEqual(0, repositories.Count);
+
+                IRepository<Customer> repository1 = sessionScope1.GetRepository<Customer>();
+
+                Assert.AreEqual(1, repositories.Count);
+                Assert.AreSame(repositories.Last(), repository1);
+
+                using (SessionScope sessionScope2 = new SessionScope(sessionFactory, SessionScopeOption.RequiresNew))
+                {
+                    Assert.AreEqual(1, repositories.Count);
+
+                    IRepository<Customer> repository2 = sessionScope2.GetRepository<Customer>();
+
+                    Assert.AreEqual(2, repositories.Count);
+                    Assert.AreSame(repositories.Last(), repository2);
+                }
+            }
+        }
+
+        [Test]
+        public void SessionScopeGetRepositoryMustReturnNewRepositoryInstanceWhenSessionScopeIsCreatedWithRequiredOption()
+        {
+            List<ISession> sessions = new List<ISession>();
+            List<IRepository<Customer>> repositories = new List<IRepository<Customer>>();
+            ISessionFactory sessionFactory = PrepareSessionFactoryProxyForGetRepositoryMethod(repositories, sessions);
+
+            using (SessionScope sessionScope1 = new SessionScope(sessionFactory))
+            {
+                Assert.AreEqual(0, repositories.Count);
+
+                IRepository<Customer> repository1 = sessionScope1.GetRepository<Customer>();
+
+                Assert.AreEqual(1, repositories.Count);
+                Assert.AreSame(repositories.Last(), repository1);
+
+                using (SessionScope sessionScope2 = new SessionScope(sessionFactory))
+                {
+                    Assert.AreEqual(1, repositories.Count);
+
+                    IRepository<Customer> repository2 = sessionScope2.GetRepository<Customer>();
+
+                    Assert.AreEqual(1, repositories.Count);
+                    Assert.AreSame(repositories.Last(), repository2);
+                    Assert.AreSame(repository1, repository2);
+                }
+            }
+        }
+
         private static ISession GetInnerSession(ISession session)
         {
             return ((SessionScope.ISessionContainer)session).InnerSession;
+        }
+
+        private static ISessionFactory PrepareSessionFactoryProxyForGetRepositoryMethod(ICollection<IRepository<Customer>> repositories, ICollection<ISession> sessions)
+        {
+            Func<IRepository<Customer>> customerRepositoryCreator = () =>
+            {
+                IRepository<Customer> repository = Substitute.For<IRepository<Customer>>();
+                repositories.Add(repository);
+                return repository;
+            };
+            Func<ISession> sessionCreator = () =>
+            {
+                ISession session = Substitute.For<ISession>();
+                IRepository<Customer> customerRepository = null;
+
+                // GetRepository method must return singleton customer repository
+                session.GetRepository<Customer>().Returns(x => customerRepository ?? (customerRepository = customerRepositoryCreator()));
+                sessions.Add(session);
+                return session;
+            };
+
+            ISessionFactory sessionFactory = Substitute.For<ISessionFactory>();
+            sessionFactory.CreateSession().Returns(x => sessionCreator());
+            return sessionFactory;
         }
     }
 }
