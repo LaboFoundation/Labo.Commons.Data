@@ -21,6 +21,9 @@
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Configurations.Add(new CustomerMapping());
+            modelBuilder.Configurations.Add(new ProductMapping());
+            modelBuilder.Configurations.Add(new OrderMapping());
+            modelBuilder.Configurations.Add(new OrderItemMapping());
         }
     }
 }

@@ -12,7 +12,8 @@
 
             HasKey(x => x.Id);
 
-            Property(x => x.Name).HasMaxLength(100);
+            Property(t => t.Id).HasColumnName("Id");
+            Property(t => t.Name).HasColumnName("Name").HasMaxLength(100);
         }
     }
 }
