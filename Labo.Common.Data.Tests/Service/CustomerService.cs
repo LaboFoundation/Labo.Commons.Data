@@ -5,6 +5,7 @@
 
     using Labo.Common.Data.EntityFramework.Session;
     using Labo.Common.Data.Session;
+    using Labo.Common.Data.SqlServer;
     using Labo.Common.Data.Tests.EntityFramework.Contexts.CodeFirst;
     using Labo.Common.Data.Tests.EntityFramework.Contexts.CodeFirst.Domain;
 
@@ -14,7 +15,7 @@
 
         public CustomerService()
         {
-            EntityFrameworkSessionFactoryProvider entityFrameworkSessionFactoryProvider = new EntityFrameworkSessionFactoryProvider();
+            BaseEntityFrameworkSessionFactoryProvider entityFrameworkSessionFactoryProvider = new SqlServerEntityFrameworkSessionFactoryProvider();
             entityFrameworkSessionFactoryProvider.ObjectContextManager.RegisterObjectContextCreator(() => ((IObjectContextAdapter)new CodeFirstDbContext()).ObjectContext);
             m_SessionScopeProvider = new SessionScopeProvider(entityFrameworkSessionFactoryProvider);
         }
