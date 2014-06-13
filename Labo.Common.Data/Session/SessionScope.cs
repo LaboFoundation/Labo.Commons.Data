@@ -105,6 +105,7 @@ namespace Labo.Common.Data.Session
                 {
                     m_InnerSession.Dispose();
                     m_InnerSession = null;
+                    m_Disposed = true;
                 }
             }
         }
