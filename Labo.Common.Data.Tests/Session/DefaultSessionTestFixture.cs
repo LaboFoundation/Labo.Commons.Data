@@ -7,6 +7,7 @@
     using Labo.Common.Data.EntityFramework.Repository;
     using Labo.Common.Data.Repository;
     using Labo.Common.Data.Session;
+    using Labo.Common.Data.SqlServer;
     using Labo.Common.Data.Tests.EntityFramework.Contexts.CodeFirst.Domain;
 
     using NSubstitute;
@@ -20,8 +21,8 @@
         public void GetRepositoryMustReturnSingletonRepositoryInstancePerEntityType()
         {
             IRepositoryFactory repositoryFactory = Substitute.For<IRepositoryFactory>();
-            repositoryFactory.CreateRepository<Customer>().Returns(x => new EntityFrameworkRepository<Customer>(null));
-            repositoryFactory.CreateRepository<Product>().Returns(x => new EntityFrameworkRepository<Product>(null));
+            repositoryFactory.CreateRepository<Customer>().Returns(x => new SqlServerEntityFrameworkRepository<Customer>(null, null));
+            repositoryFactory.CreateRepository<Product>().Returns(x => new SqlServerEntityFrameworkRepository<Product>(null, null));
 
             DefaultSession session = new DefaultSession(repositoryFactory);
 
@@ -44,7 +45,7 @@
         public void GetRepositoryMustBeThreadSafe()
         {
             IRepositoryFactory repositoryFactory = Substitute.For<IRepositoryFactory>();
-            repositoryFactory.CreateRepository<Customer>().Returns(x => new EntityFrameworkRepository<Customer>(null));
+            repositoryFactory.CreateRepository<Customer>().Returns(x => new SqlServerEntityFrameworkRepository<Customer>(null, null));
 
             DefaultSession session = new DefaultSession(repositoryFactory);
 
