@@ -38,7 +38,7 @@ namespace Labo.Common.Data.Repository
 
     public interface IRepository : IDisposable
     {
-        int Delete();
+        int DeleteAll();
 
         void SaveChanges();
 
@@ -50,9 +50,6 @@ namespace Labo.Common.Data.Repository
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         IDbConnection GetConnection();
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-        ITransaction GetTransaction();
     }
 
     public interface IRepository<TEntity> : IRepository
@@ -86,8 +83,6 @@ namespace Labo.Common.Data.Repository
 
         void AttachTo(string entitySetName, TEntity entity);
 
-        void DeleteUnAttached(TEntity entity);
-
         void BulkInsert(string destinationTable, IEnumerable<TEntity> collection);
 
         void BulkInsert(IEnumerable<TEntity> collection);
@@ -95,5 +90,7 @@ namespace Labo.Common.Data.Repository
         void BulkInsert(string destinationTable, IEnumerable<TEntity> collection, IDbConnection connection, IDbTransaction dbTransaction = null);
 
         void BulkInsert(IEnumerable<TEntity> collection, IDbConnection connection, IDbTransaction dbTransaction = null);
+
+        void Detach(TEntity entity);
     }
 }

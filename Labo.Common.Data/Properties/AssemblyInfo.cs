@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -37,8 +38,11 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: CLSCompliant(true)]
+[assembly: NeutralResourcesLanguage("en-US")]
 
 [assembly: InternalsVisibleTo("Labo.Common.Data.Tests")]
 [assembly: InternalsVisibleTo("Labo.Common.Data.EntityFramework.Mapping.CodeFirst.Tests")]
 [assembly: InternalsVisibleTo("Labo.Common.Data.EntityFramework.Mapping.DbFirst.Tests")]
 [assembly: InternalsVisibleTo("Labo.Common.Data.EntityFramework.Mapping.ModelFirst.Tests")]
+[assembly: InternalsVisibleTo("Labo.Common.Data.SqlServer.Tests")]
+[assembly: InternalsVisibleTo("Labo.Common.Data.SqlServerCe.Tests")]
