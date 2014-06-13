@@ -1,5 +1,5 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="EntityFrameworkSessionFactoryProvider.cs" company="Labo">
+// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="SqlServerCeEntityFrameworkRepositoryFactory.cs" company="Labo">
 //   The MIT License (MIT)
 //   
 //   Copyright (c) 2014 Bora Akgun
@@ -22,37 +22,28 @@
 //   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // </copyright>
 // <summary>
-//   Defines the EntityFrameworkSessionFactoryProvider type.
+//   Defines the SqlServerCeEntityFrameworkRepositoryFactory type.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Labo.Common.Data.EntityFramework.Session
+namespace Labo.Common.Data.SqlServerCe
 {
-    using Labo.Common.Data.EntityFramework.Mapping;
+    using System.Data.Objects;
+
+    using Labo.Common.Data.EntityFramework;
     using Labo.Common.Data.EntityFramework.Repository;
     using Labo.Common.Data.Repository;
-    using Labo.Common.Data.Session;
 
-    public sealed class EntityFrameworkSessionFactoryProvider : BaseSessionFactoryProvider
+    public sealed class SqlServerCeEntityFrameworkRepositoryFactory : BaseEntityFrameworkRepositoryFactory
     {
-        private readonly IEntityFrameworkObjectContextManager m_EntityFrameworkObjectContextManager;
-
-        public IEntityFrameworkObjectContextManager ObjectContextManager
+        public SqlServerCeEntityFrameworkRepositoryFactory(IEntityFrameworkObjectContextManager objectContextManager)
+            : base(objectContextManager)
         {
-            get
-            {
-                return m_EntityFrameworkObjectContextManager;
-            }
         }
 
-        public EntityFrameworkSessionFactoryProvider()
+        protected override IRepository<TEntity> CreateRepository<TEntity>(ObjectContext objectContext, IEntityFrameworkObjectContextManager objectContextManager)
         {
-            m_EntityFrameworkObjectContextManager = new EntityFrameworkObjectContextManager(new EntityMappingResolver());
-        }
-
-        protected override IRepositoryFactory GetRepositoryFactory()
-        {
-            return new EntityFrameworkRepositoryFactory(m_EntityFrameworkObjectContextManager);
+            return new SqlServerCeEntityFrameworkRepository<TEntity>(objectContext, objectContextManager);
         }
     }
 }
