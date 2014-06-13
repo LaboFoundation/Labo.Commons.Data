@@ -77,5 +77,7 @@ namespace Labo.Common.Data.Transaction
         ///   <c>true</c> if [was committed]; otherwise, <c>false</c>.
         /// </value>
         bool WasCommitted { get; }
+
+        IsolationLevel IsolationLevel { get; }
     }
 }
