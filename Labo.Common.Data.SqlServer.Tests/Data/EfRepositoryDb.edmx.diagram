@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="6341850eb6fd4047a61e6d256268b6ad" Name="Diagram1">
+        <EntityTypeShape EntityType="Labo.Common.Data.SqlServer.Tests.Data.Customer" Width="1.5" PointX="0.75" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="Labo.Common.Data.SqlServer.Tests.Data.Order" Width="1.5" PointX="3" PointY="0.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="Labo.Common.Data.SqlServer.Tests.Data.OrderItem" Width="1.5" PointX="5.25" PointY="0.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="Labo.Common.Data.SqlServer.Tests.Data.Product" Width="1.5" PointX="5.25" PointY="3.5" IsExpanded="true" />
+        <AssociationConnector Association="Labo.Common.Data.SqlServer.Tests.Data.FK_dbo_Order_dbo_Customer_CustomerId" ManuallyRouted="false" />
+        <AssociationConnector Association="Labo.Common.Data.SqlServer.Tests.Data.FK_dbo_OrderItem_dbo_Order_OrderId" ManuallyRouted="false" />
+        <AssociationConnector Association="Labo.Common.Data.SqlServer.Tests.Data.FK_dbo_OrderItem_dbo_Product_ProductId" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
