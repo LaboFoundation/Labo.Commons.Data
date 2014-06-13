@@ -84,14 +84,18 @@
     <Compile Include="EntityFramework\Contexts\CodeFirst\Mapping\ProductMapping.cs" />
     <Compile Include="EntityFramework\EntityFrameworkObjectContextManagerTestFixture.cs" />
     <Compile Include="EntityFramework\Repository\EntityFrameworkRepositoryFactoryTestFixture.cs" />
-    <Compile Include="EntityFramework\Repository\EntityFrameworkRepositoryTestFixture.cs" />
     <Compile Include="Session\DefaultSessionTestFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\CustomerService.cs" />
     <Compile Include="Session\SessionScopeProviderTestFixture.cs" />
     <Compile Include="Session\SessionScopeTestFixture.cs" />
+    <Compile Include="Transaction\DefaultTransactionTestFixture.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Labo.Common.Data.SqlServer\Labo.Common.Data.SqlServer.csproj">
+      <Project>{20EA4F76-BEDA-4EF7-AA74-62CB116599F0}</Project>
+      <Name>Labo.Common.Data.SqlServer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Labo.Common.Data\Labo.Common.Data.csproj">
       <Project>{bbcc92d3-7e58-4bdd-9d9a-5024bbf90400}</Project>
       <Name>Labo.Common.Data</Name>

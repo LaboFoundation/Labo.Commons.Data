@@ -14,6 +14,7 @@
         public CodeFirstDbContext(string connectionStringName)
             : base(connectionStringName)
         {
+            Database.CreateIfNotExists();
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

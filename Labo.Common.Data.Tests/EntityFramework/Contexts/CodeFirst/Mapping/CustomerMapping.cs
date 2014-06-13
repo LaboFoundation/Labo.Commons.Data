@@ -14,6 +14,7 @@
 
             Property(t => t.Id).HasColumnName("Id");
             Property(t => t.Name).HasColumnName("Name").HasMaxLength(100);
+            Property(t => t.IsActive).HasColumnName("IsActive").IsRequired();
         }
     }
 }

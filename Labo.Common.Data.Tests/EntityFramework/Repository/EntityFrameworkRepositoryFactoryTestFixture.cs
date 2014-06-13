@@ -8,6 +8,7 @@
     using Labo.Common.Data.EntityFramework;
     using Labo.Common.Data.EntityFramework.Mapping;
     using Labo.Common.Data.EntityFramework.Repository;
+    using Labo.Common.Data.SqlServer;
     using Labo.Common.Data.Tests.EntityFramework.Contexts.CodeFirst;
     using Labo.Common.Data.Tests.EntityFramework.Contexts.CodeFirst.Domain;
 
@@ -22,8 +23,8 @@
             ObjectContext objectContext = ((IObjectContextAdapter)new CodeFirstDbContext()).ObjectContext;
             EntityFrameworkObjectContextManager entityFrameworkObjectContextManager = new EntityFrameworkObjectContextManager(new EntityMappingResolver());
             entityFrameworkObjectContextManager.RegisterObjectContextCreator(() => objectContext, Assembly.GetExecutingAssembly());
-            
-            EntityFrameworkRepositoryFactory entityFrameworkRepositoryFactory = new EntityFrameworkRepositoryFactory(entityFrameworkObjectContextManager);
+
+            BaseEntityFrameworkRepositoryFactory entityFrameworkRepositoryFactory = new SqlServerEntityFrameworkRepositoryFactory(entityFrameworkObjectContextManager);
 
             Assert.AreEqual(0, entityFrameworkRepositoryFactory.ObjectContexts.Count);
 
@@ -43,7 +44,7 @@
             EntityFrameworkObjectContextManager entityFrameworkObjectContextManager = new EntityFrameworkObjectContextManager(new EntityMappingResolver());
             entityFrameworkObjectContextManager.RegisterObjectContextCreator(() => objectContext, Assembly.GetExecutingAssembly());
 
-            EntityFrameworkRepositoryFactory entityFrameworkRepositoryFactory = new EntityFrameworkRepositoryFactory(entityFrameworkObjectContextManager);
+            BaseEntityFrameworkRepositoryFactory entityFrameworkRepositoryFactory = new SqlServerEntityFrameworkRepositoryFactory(entityFrameworkObjectContextManager);
 
             const int threadCount = 100;
             Thread[] threads = new Thread[threadCount];
