@@ -37,9 +37,11 @@ namespace Labo.Common.Data.EntityFramework.Repository
     using System.Linq.Expressions;
 
     using global::EntityFramework.Extensions;
+    using global::EntityFramework.Future;
 
     using Labo.Common.Data.Entity;
     using Labo.Common.Data.Repository;
+    using Labo.Common.Data.Resources;
     using Labo.Common.Data.Transaction;
     using Labo.Common.Utils;
 
@@ -237,6 +239,32 @@ namespace Labo.Common.Data.EntityFramework.Repository
         public IList<TEntity> LoadAll()
         {
             return Query().ToList();
+        }
+
+        public IPagedResult<TEntity> LoadAll(int pageNo, int pageSize = 10)
+        {
+            if (pageNo < 1)
+            {
+                throw new ArgumentOutOfRangeException("pageNo", Strings.PageNo_must_be_greater_than_0);                
+            }
+
+            if (pageSize < 1)
+            {
+                throw new ArgumentOutOfRangeException("pageSize", Strings.PageSize_must_be_greater_than_0);
+            }
+
+            long skipSize = (pageNo - 1) * pageSize;
+            if (skipSize > int.MaxValue)
+            {
+                throw new OverflowException("Query skip size is greater than Int32.MinValue");
+            }
+
+            int skip = (int)skipSize;
+
+            IRepositoryQueryable<TEntity> queryable = Query();
+            FutureCount countQuery = queryable.FutureCount();
+            FutureQuery<TEntity> resultQuery = queryable.Skip(skip).Take(pageSize).Future();
+            return new PagedResult<TEntity>(resultQuery.ToList(), countQuery.Value, pageNo, pageSize);
         }
 
         public void SaveChanges()
