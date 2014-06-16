@@ -28,15 +28,19 @@
 
 namespace Labo.Common.Data.Entity
 {
-    public interface IPagedResult
+    using System;
+    using System.Collections.Generic;
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
+    public interface IPagedResult<TEntity> : IList<TEntity>, ICloneable
     {
         /// <summary>
-        /// Gets the total results.
+        /// Gets the total results count.
         /// </summary>
         int TotalResults { get; }
 
         /// <summary>
-        /// Gets Page Number is 0 based
+        /// Gets the page number
         /// </summary>
         int Page { get; }
 
@@ -51,8 +55,27 @@ namespace Labo.Common.Data.Entity
         int ItemsPerPage { get; }
 
         /// <summary>
-        /// Gets the item count.
+        /// Gets the index of the first item.
         /// </summary>
-        int Count { get; }
+        /// <value>
+        /// The start index of the first item.
+        /// </value>
+        int FirstItemIndex { get; }
+
+        /// <summary>
+        /// Gets the index of the last item.
+        /// </summary>
+        /// <value>
+        /// The index of the last item.
+        /// </value>
+        int LastItemIndex { get; }
+
+        /// <summary>
+        /// Gets the items.
+        /// </summary>
+        /// <value>
+        /// The items.
+        /// </value>
+        IList<TEntity> Items { get; } 
     }
 }

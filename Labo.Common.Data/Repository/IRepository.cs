@@ -31,6 +31,7 @@ namespace Labo.Common.Data.Repository
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Linq;
     using System.Linq.Expressions;
 
     using Labo.Common.Data.Entity;
@@ -75,13 +76,7 @@ namespace Labo.Common.Data.Repository
 
         IList<TEntity> LoadAll();
 
-        //PagedResult<TEntity> LoadAll(int pageNo, int pageSize);
-
-        //PagedResult<TEntity> PagedQuery(IQueryable<TEntity> queryable, int pageNo, int pageSize);
-
-        void Attach(TEntity entity);
-
-        void AttachTo(string entitySetName, TEntity entity);
+        IPagedResult<TEntity> LoadAll(int pageNo, int pageSize = 10);
 
         void BulkInsert(string destinationTable, IEnumerable<TEntity> collection);
 
@@ -90,6 +85,10 @@ namespace Labo.Common.Data.Repository
         void BulkInsert(string destinationTable, IEnumerable<TEntity> collection, IDbConnection connection, IDbTransaction dbTransaction = null);
 
         void BulkInsert(IEnumerable<TEntity> collection, IDbConnection connection, IDbTransaction dbTransaction = null);
+
+        void Attach(TEntity entity);
+
+        void AttachTo(string entitySetName, TEntity entity);
 
         void Detach(TEntity entity);
     }

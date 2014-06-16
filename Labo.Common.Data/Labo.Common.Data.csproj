@@ -42,8 +42,9 @@
     <Reference Include="EntityFramework5.Extended.NET45">
       <HintPath>..\packages\EntityFramework5.Extended.5.0.100\lib\net45\EntityFramework5.Extended.NET45.dll</HintPath>
     </Reference>
-    <Reference Include="Labo.Common">
-      <HintPath>..\packages\Labo.Commons.0.1.2\lib\Labo.Common.dll</HintPath>
+    <Reference Include="Labo.Common, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Labo.Commons.0.1.3\lib\net45\Labo.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -68,6 +69,7 @@
     <Compile Include="Entity\IDeletableEntity.cs" />
     <Compile Include="Entity\IDirtyPropertyTrackingEntity.cs" />
     <Compile Include="Entity\IPagedResult.cs" />
+    <Compile Include="Entity\PagedResult.cs" />
     <Compile Include="Repository\IRepositoryQueryable.cs" />
     <Compile Include="Session\BaseSessionFactoryProvider.cs" />
     <Compile Include="Session\DefaultSession.cs" />

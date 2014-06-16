@@ -1,0 +1,21 @@
+﻿v0.1
+
+- SessionScope (Unit of work) +
+- Multiple objectcontext support +
+- Update and insert by filter +
+- Bulk insert +
+- Custom paging
+- Sql Server and Sql Server Ce support
+- InMemory repository implementation for unit testing
+
+v0.2
+
+- Multilingual support
+- Concurrency support
+- DirtyPropertyTracking entity support
+- Entitylog table support
+- Auditlog table support
+- Auditable entity support
+- Dirty delete support
+- Encrypted column support
+- Indexed entity support
