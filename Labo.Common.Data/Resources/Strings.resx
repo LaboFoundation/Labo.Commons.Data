@@ -123,4 +123,16 @@
   <data name="SessionScope_Session_has_aborted" xml:space="preserve">
     <value>session has aborted</value>
   </data>
+  <data name="PageNo_must_be_greater_than_0" xml:space="preserve">
+    <value>pageNo must be greater than 0</value>
+  </data>
+  <data name="PageSize_must_be_greater_than_0" xml:space="preserve">
+    <value>pageSize must be greater than 0</value>
+  </data>
+  <data name="PagedResult_totalItemsCount_cannot_be_smaller_than_0" xml:space="preserve">
+    <value>totalItemsCount cannot be smaller than 0</value>
+  </data>
+  <data name="PagedResult_totalPages_cannot_be_smaller_than_0" xml:space="preserve">
+    <value>totalPages cannot be smaller than 0</value>
+  </data>
 </root>

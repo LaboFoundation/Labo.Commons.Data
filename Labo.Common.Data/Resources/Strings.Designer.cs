@@ -70,6 +70,42 @@ namespace Labo.Common.Data.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to totalItemsCount cannot be smaller than 0.
+        /// </summary>
+        internal static string PagedResult_totalItemsCount_cannot_be_smaller_than_0 {
+            get {
+                return ResourceManager.GetString("PagedResult_totalItemsCount_cannot_be_smaller_than_0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to totalPages cannot be smaller than 0.
+        /// </summary>
+        internal static string PagedResult_totalPages_cannot_be_smaller_than_0 {
+            get {
+                return ResourceManager.GetString("PagedResult_totalPages_cannot_be_smaller_than_0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pageNo must be greater than 0.
+        /// </summary>
+        internal static string PageNo_must_be_greater_than_0 {
+            get {
+                return ResourceManager.GetString("PageNo_must_be_greater_than_0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pageSize must be greater than 0.
+        /// </summary>
+        internal static string PageSize_must_be_greater_than_0 {
+            get {
+                return ResourceManager.GetString("PageSize_must_be_greater_than_0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to session has aborted.
         /// </summary>
         internal static string SessionScope_Session_has_aborted {
